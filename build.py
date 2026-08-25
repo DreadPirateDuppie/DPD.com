@@ -310,12 +310,13 @@ def shell(title, desc, body, up, og=None, cls=""):
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{html.escape(title)}</title>
 <meta name="description" content="{html.escape(desc, quote=True)}">
 <meta property="og:title" content="{html.escape(title, quote=True)}">
 <meta property="og:description" content="{html.escape(desc, quote=True)}">
-<meta property="og:type" content="website">{ogtag}
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#000000">{ogtag}
 <link rel="stylesheet" href="{up}assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23000%22/><text y=%2278%22 x=%2250%22 text-anchor=%22middle%22 font-size=%2288%22 fill=%22%2300FF07%22 font-family=%22monospace%22>&gt;</text></svg>">
 </head>
@@ -375,8 +376,9 @@ def write_btek():
 
     def card(v, i):
         name, iso, disp, dur, secs, thumb = v
+        dup = " is-latest" if i == 1 else ""   # card() receives a 1-based index
         return f"""
-    <article class="set" data-title="{html.escape(name.lower(), quote=True)}">
+    <article class="set{dup}" data-title="{html.escape(name.lower(), quote=True)}">
       <a class="set-img" href="{BTEK_URL}" rel="noopener">
         <img src="assets/img/{thumb}.webp" alt="" loading="lazy" decoding="async">
         <span class="set-dur">{dur}</span>
@@ -396,7 +398,7 @@ def write_btek():
 <header class="head btek-head">
   <canvas class="rain" data-rain aria-hidden="true"></canvas>
   {nav("")}
-  <p class="skulls">&#9760;&#9760;&#9760;&#9760;&#9760;&#9760;&#9760;BTEK.FM&#9760;&#9760;&#9760;&#9760;&#9760;&#9760;&#9760;</p>
+  <p class="skulls"><span class="sk">&#9760;&#9760;&#9760;&#9760;</span>&#9760;&#9760;&#9760;BTEK.FM&#9760;&#9760;&#9760;<span class="sk">&#9760;&#9760;&#9760;&#9760;</span></p>
   <p class="btek-sub">PIRATE RADIO OUT OF PECKHAM &#183; HOSTED BY DJ FRYEYE</p>
 </header>
 
@@ -617,9 +619,10 @@ def write_index(built):
 
     cards = []
     for p in built:
+        featured_cls = " is-featured" if p is feat else ""
         lock = '<span class="lock">&gt;_LOCKED</span>' if p["locked"] else ""
         cards.append(f"""
-    <article class="card" data-cats="{html.escape(' '.join(p['cats']), quote=True)}">
+    <article class="card{featured_cls}" data-cats="{html.escape(' '.join(p['cats']), quote=True)}">
       <a class="card-img{" fit" if p["cover"] in COVER_CONTAIN else ""}" href="posts/{p['slug']}.html">
         <img src="assets/img/{p['cover']}.webp" alt="" loading="lazy" decoding="async">
       </a>

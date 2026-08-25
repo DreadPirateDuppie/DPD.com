@@ -482,3 +482,86 @@ a.wordmark{ text-decoration:none; display:block; }
   position:absolute; bottom:1.25rem; left:0; right:0; text-align:center;
   font-family:var(--mono); font-size:.72rem; color:var(--green-mid); margin:0;
 }
+
+/* =====================================================================
+   MOBILE
+   Measured on a real 390x844 viewport: every tap target was under 40px,
+   several labels under 10px, and the featured post repeated immediately
+   as the first grid card.
+   ===================================================================== */
+@media (max-width:760px){
+
+  /* reclaim fixed chrome, and clear the notch / home indicator */
+  :root{ --tick:28px; }
+  body{
+    padding-top:calc(var(--tick) + env(safe-area-inset-top));
+    padding-bottom:calc(var(--tick) + env(safe-area-inset-bottom));
+  }
+  .ticker.t{ padding-top:env(safe-area-inset-top); height:calc(var(--tick) + env(safe-area-inset-top)); }
+  .ticker.b{ padding-bottom:env(safe-area-inset-bottom); height:calc(var(--tick) + env(safe-area-inset-bottom)); }
+  .ticker-run{ font-size:.8rem; }
+
+  /* the wordmark should own the screen, not sit in it */
+  .wordmark{ font-size:clamp(1.35rem,6.9vw,3.1rem); letter-spacing:0; }
+  .wordmark.small{ font-size:1.15rem; }
+  .head{ padding-bottom:1.75rem; }
+
+  /* nav + category bar become swipeable strips instead of wrapping */
+  .nav,.catbar{
+    flex-wrap:nowrap; justify-content:flex-start;
+    overflow-x:auto; overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none; gap:0;
+    padding-inline:var(--pad);
+    scroll-snap-type:x proximity;
+  }
+  .nav::-webkit-scrollbar,.catbar::-webkit-scrollbar{ display:none; }
+  .nav a,.catbar .cat{
+    flex:none; scroll-snap-align:start;
+    min-height:44px; display:flex; align-items:center;
+    padding:0 .85rem; font-size:.85rem;
+  }
+  .catbar .cat{ border-bottom:2px solid transparent; }
+  .catbar .cat.on{ border-color:var(--red); }
+
+  /* 44px targets everywhere they were short */
+  .chip,.lock,.genre{ min-height:44px; display:inline-flex; align-items:center; font-size:.75rem; padding-inline:.85rem; }
+  .set-title a,.card-title a,.feat-title a{
+    display:flex; align-items:center; min-height:44px; padding:.4rem 0;
+  }
+  .foot-line a{ display:inline-block; padding:.72rem .35rem; }
+  .lb-close,.lb-nav{ width:52px; height:52px; }
+
+  /* nothing under ~11.5px */
+  .btek-sub{ font-size:.72rem; letter-spacing:.18em; }
+  .set-no,.shot-n,.set-dur{ font-size:.72rem; }
+  .binary{ font-size:.72rem; }
+  .onair-tag{ font-size:.74rem; }
+  .byline{ font-size:.8rem; }
+  .count{ font-size:.72rem; }
+
+  /* the featured post / latest set is right above; don't repeat it below */
+  .grid .card.is-featured.dup-hidden{ display:none; }
+  .sets .set.is-latest{ display:none; }
+
+  /* the skull run has to shed a few to stay legible */
+  .skulls{ font-size:1.4rem; letter-spacing:.04em; }
+  .skulls .sk{ display:none; }
+  .btek-sub{ color:#ff6b6b; }
+
+  /* tighter, punchier cards */
+  .card-ex{ -webkit-line-clamp:4; }
+  .feat-ex{ font-size:.95rem; }
+  .feat-title{ font-size:1.3rem; }
+  .sec-row{ margin-top:2.25rem; }
+
+  /* touch feedback */
+  .card:active,.set:active,.shot-t:active{ border-color:var(--green); transform:scale(.995); }
+  .btn:active,.chat:active{ transform:scale(.98); }
+}
+
+/* scroll reveal - cheap, and off entirely for reduced motion */
+@media (prefers-reduced-motion:no-preference){
+  .reveal{ opacity:0; transform:translateY(14px); }
+  .reveal.in{ opacity:1; transform:none; transition:opacity .5s ease,transform .5s cubic-bezier(.2,.7,.3,1); }
+}

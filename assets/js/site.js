@@ -65,13 +65,15 @@
   var empty = document.getElementById("empty");
 
   function apply(cat) {
-    var n = 0;
+    var feat = document.querySelector(".card.is-featured");
+    if (feat) feat.classList.toggle("dup-hidden", cat === "all");
     cards.forEach(function (c) {
       var hit = cat === "all" ||
         (" " + c.getAttribute("data-cats") + " ").indexOf(" " + cat + " ") > -1;
       c.hidden = !hit;
-      if (hit) n++;
     });
+    // offsetParent is null for anything a media query has display:none'd
+    var n = cards.filter(function (c) { return !c.hidden && c.offsetParent !== null; }).length;
     if (shown) shown.textContent = n;
     if (empty) empty.hidden = n !== 0;
     if (bar) {
@@ -86,6 +88,11 @@
     var q = /[?&]cat=([^&#]+)/.exec(location.search);
     apply(q ? decodeURIComponent(q[1]) : "all");
   } catch (err) { apply("all"); }
+
+  addEventListener("resize", function () {
+    var on = bar && bar.querySelector(".cat.on");
+    apply(on ? on.getAttribute("data-cat") : "all");
+  });
 
   document.addEventListener("click", function (e) {
     var a = e.target.closest && e.target.closest("[data-cat]");
@@ -108,16 +115,20 @@
   var none = document.getElementById("noresult");
 
   function run() {
-    var term = q.value.trim().toLowerCase(), n = 0;
+    var term = q.value.trim().toLowerCase();
     sets.forEach(function (s) {
       var hit = !term || s.getAttribute("data-title").indexOf(term) > -1;
       s.hidden = !hit;
-      if (hit) n++;
     });
+    var n = sets.filter(function (s) {
+      return !s.hidden && s.offsetParent !== null;
+    }).length;
     if (count) count.textContent = n;
     if (none) none.hidden = n !== 0;
   }
   q.addEventListener("input", run);
+  addEventListener("resize", run);
+  run();
 })();
 
 /* ---- photography lightbox ---- */
@@ -160,4 +171,21 @@
     else if (e.key === "ArrowLeft") show(cur - 1);
     else if (e.key === "ArrowRight") show(cur + 1);
   });
+})();
+
+
+/* ---- scroll reveal ---- */
+(function () {
+  "use strict";
+  if (!window.IntersectionObserver) return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var els = [].slice.call(document.querySelectorAll(".card,.set,.shot-t,.who-box,.genres-box"));
+  if (!els.length) return;
+  els.forEach(function (el) { el.classList.add("reveal"); });
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+    });
+  }, { rootMargin: "0px 0px -8% 0px", threshold: 0.05 });
+  els.forEach(function (el) { io.observe(el); });
 })();
