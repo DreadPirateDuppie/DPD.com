@@ -25,13 +25,38 @@ NAV = [
     ("Home", "index.html", ""),
     ("Photography", ORIGIN + "/projects-7", "ext"),
     ("Blog", "index.html#blog", ""),
-    ("BTEK.FM", ORIGIN + "/livestream", "ext"),
+    ("BTEK.FM", "btek.html", ""),
     ("Shop", ORIGIN + "/category/all-products", "ext"),
     ("Letterboxd", ORIGIN + "/letterboxd", "ext"),
     ("About", ORIGIN + "/about", "ext"),
 ]
 
 # covers that are logos, not photographs: letterbox them instead of cropping
+BTEK_URL = ORIGIN + "/livestream"
+# carried over from the live BTEK.FM page footer
+BINARY = ('<p class="binary" title="smoke weed everyday">01110011 01101101 01101111 01101011 '
+          '01100101 00100000 01110111 01100101 01100101 01100100 00100000 01100101 01110110 '
+          '01100101 01110010 01111001 01100100 01100001 01111001</p>')
+# The channel's genre list, as it appears on the live page. Wix does not expose
+# a per-video category in its JSON-LD, so these are shown as the station's
+# genres rather than used as per-set filters.
+GENRES = ["Africa", "Drill", "Electronic", "God", "Gospel", "Holy", "Jungle",
+          "Music", "Radio", "Rap", "Southern Comfort", "Trap"]
+# name, upload date, display date, duration, seconds, thumbnail hash
+STREAMS = [
+    ("DJ FRYEYE 11/08/26", "2026-08-12", "12.08.26", "56:42", 3402, "a055e6_1a53ba3cbc4f4ad8956d2c34d1fd4f0df002"),
+    ("DJ FRYEYE - 27/07/26", "2026-07-26", "26.07.26", "1:18:09", 4689, "a055e6_19df0dd30777461589b9ba8ae886f1d8f002"),
+    ("DJ FRYEYE 15/07/26", "2026-07-15", "15.07.26", "1:57:43", 7063, "a055e6_7a728888b8e4441d8f9d51aed6c8dc3ef002"),
+    ("Btek.FM Radio - 07/07/26 - Hosted by DJ FRYEYE", "2026-07-07", "07.07.26", "2:46:48", 10008, "a055e6_501fa2df87494939926b1affc01551c8f002"),
+    ("DJ FRYEYE 07/07/26", "2026-07-07", "07.07.26", "2:34:56", 9296, "a055e6_3be2e804251e4949b18a27aa71dfdd2df002"),
+    ("DJ FRYEYE 04/07/26", "2026-07-04", "04.07.26", "1:55:08", 6908, "a055e6_c7726fa08d954ed495822c398baa1356f002"),
+    ("DJ FRYEYE Live 25/06/26", "2026-06-25", "25.06.26", "2:59:55", 10795, "a055e6_e144e7728f334845a41189447142868bf002"),
+    ("DJ FRYEYE 14/06/25", "2026-06-14", "14.06.26", "1:56:51", 7011, "a055e6_4a0b9c250bad4547a1a1076ed2a21371f002"),
+    ("DJ FRYEYE 12/06/26", "2026-06-12", "12.06.26", "3:49", 229, "a055e6_5658c7dd696d483b8cab83d7774d77f7f002"),
+    ("DJ FRYEYE 25/05/26", "2026-05-25", "25.05.26", "2:14:23", 8063, "a055e6_88f74312dfc74e6a9a6b37fac9fbcf3ef002"),
+    ("CLICKBAIT Vs DJ FRYEYE 18/05/26", "2026-05-18", "18.05.26", "2:35:21", 9321, "a055e6_a0a8f63e30d446f3b55755021e426c30f002"),
+]
+
 COVER_CONTAIN = {"a055e6_dc2f43b66a114014bf30e2c500eb37f9"}
 
 CATS = [">_General", ">_Trading", ">_Crypto", ">_The_System",
@@ -296,7 +321,7 @@ def shell(title, desc, body, up, og=None, cls=""):
 """
 
 
-def footer(up):
+def footer(up, extra=""):
     return f"""
 <footer class="foot" id="about">
   <canvas class="rain" data-rain aria-hidden="true"></canvas>
@@ -305,6 +330,7 @@ def footer(up):
     <p class="foot-line">&copy; DreadPirateDuppie 2026.</p>
     <p class="foot-line"><a href="mailto:{EMAIL}">{EMAIL}</a></p>
     <p class="foot-line"><a class="red" href="{ORIGIN}" rel="noopener">&gt;_ORIGINAL_SITE</a></p>
+    {extra}
   </div>
 </footer>
 """
@@ -327,7 +353,93 @@ def main():
         write_post(p, built[i - 1] if i else None,
                    built[i + 1] if i < len(built) - 1 else None)
     write_index(built)
+    write_btek()
     print("built %d posts, %d locked" % (len(built), sum(p["locked"] for p in built)))
+
+
+
+def write_btek():
+    total = sum(x[4] for x in STREAMS)
+    hrs, mins = total // 3600, total % 3600 // 60
+    latest = STREAMS[0]
+
+    def card(v, i):
+        name, iso, disp, dur, secs, thumb = v
+        return f"""
+    <article class="set" data-title="{html.escape(name.lower(), quote=True)}">
+      <a class="set-img" href="{BTEK_URL}" rel="noopener">
+        <img src="assets/img/{thumb}.webp" alt="" loading="lazy" decoding="async">
+        <span class="set-dur">{dur}</span>
+        <span class="set-play">&#9654;</span>
+      </a>
+      <div class="set-body">
+        <span class="set-no">{i:02d}</span>
+        <h3 class="set-title"><a href="{BTEK_URL}" rel="noopener">{html.escape(name)}</a></h3>
+        <p class="set-meta"><time datetime="{iso}">{disp}</time><span class="dot">&middot;</span>{dur}</p>
+      </div>
+    </article>"""
+
+    cards = "".join(card(v, i + 1) for i, v in enumerate(STREAMS))
+    genres = "".join('<span class="genre">%s</span>' % html.escape(g) for g in GENRES)
+
+    body = f"""
+<header class="head btek-head">
+  <canvas class="rain" data-rain aria-hidden="true"></canvas>
+  {nav("")}
+  <p class="skulls">&#9760;&#9760;&#9760;&#9760;&#9760;&#9760;&#9760;BTEK.FM&#9760;&#9760;&#9760;&#9760;&#9760;&#9760;&#9760;</p>
+  <p class="btek-sub">PIRATE RADIO OUT OF PECKHAM &#183; HOSTED BY DJ FRYEYE</p>
+</header>
+
+<main class="wrap">
+  <section class="onair">
+    <a class="onair-img" href="{BTEK_URL}" rel="noopener">
+      <img src="assets/img/{latest[5]}.webp" alt="" fetchpriority="high" decoding="async">
+      <span class="onair-play">&#9654;</span>
+    </a>
+    <div class="onair-body">
+      <p class="onair-tag"><span class="dotlive"></span>LATEST TRANSMISSION</p>
+      <h1 class="onair-title">{html.escape(latest[0])}</h1>
+      <p class="onair-meta">{latest[2]}<span class="dot">&middot;</span>{latest[3]}</p>
+      <a class="btn green" href="{BTEK_URL}" rel="noopener">&gt;_PLAY_AT_SOURCE</a>
+    </div>
+  </section>
+
+  <a class="chat" href="{BTEK_URL}" rel="noopener">!!! &darr; Join &darr; The &darr; Chat &darr; !!!</a>
+
+  <div class="sec-row" id="archive">
+    <h2 class="sec">BTEK.FM Archive</h2>
+    <p class="count"><span id="setcount">{len(STREAMS)}</span> / {len(STREAMS)} SETS &middot; {hrs}h {mins}m</p>
+  </div>
+
+  <div class="searchbar">
+    <label for="q" class="sr">Search sets</label>
+    <input id="q" type="search" placeholder="&gt; search sets..." autocomplete="off">
+  </div>
+
+  <div class="sets">{cards}</div>
+  <p class="empty" id="noresult" hidden>&gt;_NO_SETS_MATCH</p>
+
+  <section class="genres-box">
+    <h2 class="sec small">Genres</h2>
+    <div class="genres">{genres}</div>
+  </section>
+
+  <section class="who-box">
+    <h2 class="sec small">About the station</h2>
+    <p>BTEK.FM is the livestream arm of dreadpirateduppie.com &mdash; long-form sets and radio
+    shows recorded live, mostly by DJ FRYEYE, running anywhere from four minutes to three hours.</p>
+    <p class="note">This page is a static index of the stream archive. Playback happens on the
+    live site, which hosts the video &mdash; every set here links straight to it.</p>
+  </section>
+</main>
+{footer("", BINARY)}
+"""
+    with open(os.path.join(ROOT, "btek.html"), "w") as f:
+        f.write(shell("BTEK.FM | " + SITE,
+                      "Pirate radio out of Peckham. %d archived sets, %dh %dm of it, "
+                      "hosted by DJ FRYEYE." % (len(STREAMS), hrs, mins),
+                      body, "", og=latest[5], cls="btek"))
+    print("built btek.html (%d sets, %dh %dm)" % (len(STREAMS), hrs, mins))
 
 
 def write_post(p, prev_p, next_p):

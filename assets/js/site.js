@@ -97,3 +97,25 @@
     document.getElementById("blog").scrollIntoView({ block: "start" });
   });
 })();
+
+/* ---- BTEK set search ---- */
+(function () {
+  "use strict";
+  var q = document.getElementById("q");
+  if (!q) return;
+  var sets = [].slice.call(document.querySelectorAll(".set"));
+  var count = document.getElementById("setcount");
+  var none = document.getElementById("noresult");
+
+  function run() {
+    var term = q.value.trim().toLowerCase(), n = 0;
+    sets.forEach(function (s) {
+      var hit = !term || s.getAttribute("data-title").indexOf(term) > -1;
+      s.hidden = !hit;
+      if (hit) n++;
+    });
+    if (count) count.textContent = n;
+    if (none) none.hidden = n !== 0;
+  }
+  q.addEventListener("input", run);
+})();
