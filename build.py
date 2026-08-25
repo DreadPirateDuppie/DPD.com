@@ -20,12 +20,15 @@ EMAIL = "Dreadpirateduppie@proton.me"
 ORIGIN = "https://www.dreadpirateduppie.com"
 
 NAV = [
+    # mirrors the original site's menu. Only the blog is reproduced in this
+    # archive; the other sections still live on dreadpirateduppie.com.
     ("Home", "index.html", ""),
-    ("Photography", "https://dreadpirateduppie.github.io/rmgl-portfolio/", "ext"),
+    ("Photography", ORIGIN + "/projects-7", "ext"),
     ("Blog", "index.html#blog", ""),
-    ("BTEK.FM", "https://dreadpirateduppie.github.io/BTEK.FM/", "ext"),
-    ("Pushinn", "https://pushinn.app/", "ext"),
-    ("About", "index.html#about", ""),
+    ("BTEK.FM", ORIGIN + "/livestream", "ext"),
+    ("Shop", ORIGIN + "/category/all-products", "ext"),
+    ("Letterboxd", ORIGIN + "/letterboxd", "ext"),
+    ("About", ORIGIN + "/about", "ext"),
 ]
 
 # covers that are logos, not photographs: letterbox them instead of cropping
@@ -435,10 +438,7 @@ def write_index(built):
   <section class="who-box">
     <h2 class="sec">Who is DPD?</h2>
     <p>/Founder/Scientist/Student of life/Triptonaught/Statistic/Boss/Citizen of The World/God/G.</p>
-    <p>Writing out of Peckham, London on privacy, power, culture and the cost of your attention.
-    Builds <a href="https://pushinn.app/" rel="noopener">Pushinn</a>, runs
-    <a href="https://dreadpirateduppie.github.io/BTEK.FM/" rel="noopener">BTEK.FM</a>, shoots
-    <a href="https://dreadpirateduppie.github.io/rmgl-portfolio/" rel="noopener">photography</a>.</p>
+    <p>Writing out of Peckham, London on privacy, power, culture and the cost of your attention.</p>
     <p class="note">This is a static archive of {len(built)} posts from
     dreadpirateduppie.com. Subscriber-only posts appear as excerpts and link back to the source.</p>
   </section>
