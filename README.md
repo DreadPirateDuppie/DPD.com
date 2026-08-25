@@ -1,15 +1,29 @@
-# dreadpirateduppie.com — archive
+# dreadpirateduppie.com — static archive
 
-A static archive of the writing originally published at
-[dreadpirateduppie.com](https://www.dreadpirateduppie.com): 12 posts,
-~17,000 words, 29 images, no trackers, no JavaScript beyond a scroll bar.
+A static rebuild of [dreadpirateduppie.com](https://www.dreadpirateduppie.com),
+matching the original's terminal look: black ground, `#00FF07` phosphor green,
+`#FA0000` alert red, Courier New chrome, Matrix rain and the
+`> _STANDING_ON_BUSINESS_SINCE_2025.` tickers.
+
+14 posts, real publication dates, categories and read times.
+
+## Where the data comes from
+
+- **Metadata** — titles, dates, categories, read times, excerpts and cover
+  images come from the site's own RSS feed (`/blog-feed.xml`).
+- **Post bodies** — scraped markdown in `content/posts/`.
+- **Images** — resized to 1600px and converted to webp.
+
+Four posts were subscriber-only on the original. The build detects the paywall
+marker, shows the feed excerpt as the opening, and links back to the source.
 
 ## Layout
 
 ```
-content/posts/   source markdown (scraped from the original site)
-assets/img/      images, resized to 1600px and converted to webp
-assets/css/      the stylesheet
+content/posts/   source markdown
+assets/img/      webp images + author avatar
+assets/css/      stylesheet
+assets/js/       matrix rain + category filter
 build.py         the generator
 index.html       generated
 posts/*.html     generated
@@ -21,7 +35,6 @@ posts/*.html     generated
 python3 build.py
 ```
 
-No dependencies — standard library only. Post titles, deks and tags live in
-the `POSTS` table at the top of `build.py`; everything else is derived from the
-markdown. Posts that were subscriber-only on the original site are detected by
-their paywall marker and rendered as excerpts that link back to the source.
+No dependencies — standard library only. The `POSTS` table at the top of
+`build.py` holds the feed-derived metadata; everything else is derived from the
+markdown.

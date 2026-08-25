@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Static site generator for dreadpirateduppie.com archive."""
+"""Static rebuild of dreadpirateduppie.com.
+
+Metadata (titles, dates, categories, excerpts, read times, cover images) comes
+from the site's own RSS feed; post bodies come from the scraped markdown in
+content/posts/.
+"""
 import html
 import os
 import re
@@ -9,80 +14,137 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(ROOT, "content", "posts")
 OUT_POSTS = os.path.join(ROOT, "posts")
 
-SITE_TITLE = "Dread Pirate Duppie"
-SITE_DESC = "Essays on privacy, power, culture and the cost of your attention. Written from Peckham, London."
+SITE = "DREADPIRATEDUPPIE.COM"
+TAGLINE = "> _STANDING_ON_BUSINESS_SINCE_2025."
+EMAIL = "Dreadpirateduppie@proton.me"
+ORIGIN = "https://www.dreadpirateduppie.com"
 
-# Ordered newest-first, matching the original site's archive order.
+NAV = [
+    ("Home", "index.html", ""),
+    ("Photography", "https://dreadpirateduppie.github.io/rmgl-portfolio/", "ext"),
+    ("Blog", "index.html#blog", ""),
+    ("BTEK.FM", "https://dreadpirateduppie.github.io/BTEK.FM/", "ext"),
+    ("Pushinn", "https://pushinn.app/", "ext"),
+    ("About", "index.html#about", ""),
+]
+
+# covers that are logos, not photographs: letterbox them instead of cropping
+COVER_CONTAIN = {"a055e6_dc2f43b66a114014bf30e2c500eb37f9"}
+
+CATS = [">_General", ">_Trading", ">_Crypto", ">_The_System",
+        ">_Pushinn", ">_Captins_Logs", ">_Harm_Reduction"]
+
+# slug, title, date, categories, read time, cover image hash, feed excerpt
 POSTS = [
-    dict(slug="legalize-it", title="Legalize It", sub="",
-         dek="A neighbour smelled a plant through a wall and decided a caged human being was the reasonable response. On how deep the conditioning goes.",
-         tags=["Drug Policy", "Control"]),
-    dict(slug="introducing-pushinn", title="Introducing PushInn", sub="",
-         dek="The project that's been living rent free in my head since 2021. No co-founder, no budget, just a camera roll full of spots and enough delusion to see it through.",
-         tags=["Pushinn", "Building"]),
-    dict(slug="the-winter-protocol-a-31-day-system-override-for-the-urban-high-performer",
-         title="The Winter Protocol", sub="A 31-Day System Override for the Urban High Performer",
-         dek="Why everyone's out here playing chemist with their own neurotransmitters — and what an actual reset looks like when the underlying conditions haven't changed.",
-         tags=["Health", "Systems"]),
-    dict(slug="drake-is-a-clown", title="Drake Is a Clown", sub="",
-         dek="A subscriber-only post \u2014 only the headline survived into the archive.",
-         tags=["Culture"]),
-    dict(slug="dreadpirateroberts", title="DreadPirateRoberts", sub="",
-         dek="At long last, Ross is free.", tags=["Freedom"]),
-    dict(slug="free-isn-t-free", title="Free Isn't Free", sub="",
-         dek="We'll fight tooth and nail over money and sleepwalk straight through our time. Only one of those two things is unrecoverable.",
-         tags=["Attention", "Time"]),
-    dict(slug="collateral-damage", title="Collateral Damage", sub="",
-         dek="My niece is 14 and genuinely smart, and the algorithm ate her. What's actually running under the hood of a phone built to hunt a child.",
-         tags=["Attention", "Youth"]),
-    dict(slug="the-wagwan-paradox-consuming-the-culture-fearing-the-people",
-         title="The Wagwan Paradox", sub="Consuming the Culture, Fearing the People",
-         dek="From the living room to the global charts — how society loves Black culture and stays terrified of Black people.",
-         tags=["Race", "Culture"]),
-    dict(slug="the-digital-reality-check-limited-offer", title="The Digital Reality Check", sub="",
-         dek="The difference between an aesthetic and a reality, and the exact point where appreciation ends and extraction begins.",
-         tags=["Culture"]),
-    dict(slug="the-toll-booth-economy-education-housing-the-end-of-sovereignty",
-         title="The Toll Booth Economy", sub="Education, Housing & the End of Sovereignty",
-         dek="In 1978 a 23-year-old on a median salary bought a terrace in Zone 3. The ratio was 3:1. It's now 15:1. That wasn't weather — it was policy.",
-         tags=["Economics", "London"]),
-    dict(slug="xmr-ftw", title="XMR FTW", sub="",
-         dek="I said Monero would survive the delisting wave, that privacy couldn't be killed by regulation. One year later I'm back to tell you I was right.",
-         tags=["Privacy", "Monero"]),
-    dict(slug="xidiocracy", title="Xidiocracy", sub="",
-         dek="It's 2025 and society has become unrecognizable. Oxygen, the internet and dopamine are tracked and taxed.",
-         tags=["Fiction", "Satire"]),
+    ("the-ai-copium-bubble-toll-booth-economy-part-ii",
+     "The AI Copium Bubble: Toll Booth Economy, Part II", "2026-07-22", "Jul 22",
+     [">_Trading", ">_Crypto"], 8, "a055e6_46ecea8660544f2490ea415d245919c8",
+     "We are watching an exact repeat of the dot com crash, and the market is completely "
+     "swimming in corporate copium. The stock prices of these massive tech monopolies are "
+     "completely disconnected from reality..."),
+    ("substance-as-a-service-the-crackhead-cliches",
+     "Substance as a Service & the Crackhead Clichés", "2026-07-14", "Jul 14",
+     [">_Captins_Logs"], 31, "a055e6_fa4c72d220954ed987221b1b634dc255",
+     "I am archiving this record as a Time Capsule. When the empire is fully established and "
+     "I'm looking back on these foundational years from a much more comfortable vantage point, "
+     "it'll be highly amusing to remember exactly what the terrain looked like when I was still "
+     "a captain without a physical vessel, forced to navigate the asphalt archipelago of "
+     "Peckham on foot..."),
+    ("legalize-it", "Legalize it.", "2026-06-08", "Jun 8",
+     [">_The_System"], 8, "a055e6_53844be106a944c485076e79c38db673",
+     "Wag1, This one's a good one, so get comfortable and suspend your disbelief if you are a "
+     "sceptic, as I have a point to make. A friend of mine recently got into some shit with "
+     "their neighbor. Not over noise, not over parking, not over anything that actually "
+     "disrupts anyone's life in a meaningful way..."),
+    ("collateral-damage", "Collateral Damage", "2026-06-06", "Jun 6",
+     [">_The_System"], 4, "a055e6_681be9f531ed4f92a3774049847db2ef",
+     "Wag1, today I want to share a story about somebody close to me. My niece is 14. And I'm "
+     "not gonna lie, watching what's been happening to her lately has been genuinely "
+     "disheartening. She's smart. Like, actually smart. But she's been completely swallowed by "
+     "a K-pop rabbit hole..."),
+    ("free-isn-t-free", "Free Isn't Free", "2026-05-12", "May 12",
+     [">_The_System"], 3, "a055e6_ea7369d0b10f4776a4fd816f2c4109d1",
+     "Yo, wag1 people. Had this idea floating around in my head for a bit and felt like it "
+     "deserved to see the light of day, so here you go. To kick this one off, we're going to do "
+     "a thought experiment. Imagine someone steals your phone. What do you do?"),
+    ("xmr-ftw", "XMR FTW", "2026-02-17", "Feb 17",
+     [">_Crypto", ">_Trading"], 11, "a055e6_dc2f43b66a114014bf30e2c500eb37f9",
+     "In a world where every financial decision you make is being watched, tracked, and "
+     "recorded, your financial privacy isn't just something nice to have, it's something you "
+     "need to protect. Cash is disappearing, banks are tightening their control, and "
+     "corporations are profiting off your personal data. This is where Monero (XMR) steps in."),
+    ("the-wagwan-paradox-consuming-the-culture-fearing-the-people",
+     "The \"Wagwan\" Paradox: Consuming the Culture, Fearing the People", "2026-02-16", "Feb 16",
+     [">_General"], 16, "a055e6_78586a8a1d88481181fdbf60aef61e75",
+     "From the living room to the global charts—how society loves Black culture but stays "
+     "terrified of Black people."),
+    ("introducing-pushinn", "Introducing Pushinn", "2026-01-30", "Jan 30",
+     [">_Pushinn"], 7, "a055e6_288610b888e5493db1457f08a2a0ff52",
+     "Yoo, This post is about a project thats been living rent free in my head since 2021. "
+     "Can't lie It’s not just a business idea at this point; it’s become an obsession."),
+    ("the-toll-booth-economy-education-housing-the-end-of-sovereignty",
+     "The Toll Booth Economy: Education, Housing & The End of Sovereignty", "2026-01-20", "Jan 20",
+     [">_The_System"], 3, "a055e6_3be58bbfa946417a8babe3a2eb5935b5",
+     "Back In 1978, the economic architecture of London supported a high degree of individual "
+     "sovereignty. A twenty-three-year-old on a median salary could typically afford a "
+     "Victorian terrace in Zone 3. At that time, the price-to-income ratio for housing was "
+     "approximately 3:1."),
+    ("the-digital-reality-check-limited-offer",
+     "The Clout Chasing Culture Vultures Starter Pack", "2026-01-15", "Jan 15",
+     [">_General"], 1, "a055e6_1740b92f2c224735842932dd7e514e64",
+     "If you’ve ever felt like your online presence is starting to lean more toward a "
+     "\"costume\" than a genuine appreciation, you need to step back. This guide is designed to "
+     "help you navigate that line, identifying where appreciation ends and extraction begins."),
+    ("the-winter-protocol-a-31-day-system-override-for-the-urban-high-performer",
+     "The Grey Sky Detox: A Technical Breakdown for surviving dry Jan in the London Winter",
+     "2026-01-12", "Jan 12",
+     [">_Harm_Reduction"], 12, "a055e6_8990b372be8c431c89c11cec2fa28de6",
+     "it's mid-January and we're damn near halfway through Dry January. If you're still "
+     "standing, congrats MF, you've made it past the hardest part. If you've already folded, "
+     "no judgment, but maybe give this a read anyway."),
+    ("dreadpirateroberts", "@DreadPirateRoberts", "2025-01-23", "Jan 23, 2025",
+     [">_Crypto"], 2, "a055e6_92c25e712a0c49a29f09c39810b29c57",
+     "At Long Last, Ross Is Free!!! Ten years ago, a crazy MF called Ross Ulbricht created the "
+     "Silk Road, a platform that redefined freedom in the digital age. It was revolutionary, a "
+     "space for privacy, autonomy, and resistance against centralized control."),
+    ("xidiocracy", "Xidiocracy", "2025-01-23", "Jan 23, 2025",
+     [">_The_System"], 4, "a055e6_392ba068eb8c4be0a409da57c44e0e05",
+     "It’s 2025, and society has become unrecognizable. People are obsessed with laughing "
+     "gas, social media, and bias-affirming echo chambers. Birthrates have plummeted as "
+     "governments worldwide succumb to the temptations of corruption."),
+    ("drake-is-a-clown", "Drake is a  Clown", "2025-01-19", "Jan 19, 2025",
+     [">_General"], 2, "a055e6_35affedf822b460e9bdcd6bc543d6e73",
+     "Wag1, this one dedicated to Champagne Papi. The other night, I was deep in the YouTube "
+     "rabbit hole and stumbled on a video about the self-proclaimed alpha... and man, it's not "
+     "looking good for ya boy."),
 ]
 
 PAYWALL_RE = re.compile(r"###\s*Want to read more\?", re.I)
 IMG_MD_RE = re.compile(r"!\[(.*?)\]\((.*?)\)")
 HASH_RE = re.compile(r"(a055e6_[a-f0-9]+)")
 LINK_RE = re.compile(r"\[([^\]]*)\]\(((?:[^()]|\([^()]*\))*)\)")
-# Wix autolinked sentence fragments: "obsession.In", "power.It", "matter.ye"
 JUNK_LINK_RE = re.compile(r"^https?://[A-Za-z]+\.[A-Za-z]{2,3}/?$")
 URLTEXT_RE = re.compile(r"^https?://([^/\s]+)")
-# a mangled Wix commerce widget scraped as one run-on line
-JUNK_LINES = {"Limited Time OfferThe Clout Chasing Culture Vultures Starter Pack\u00a325.00\u00a35.00Buy Now"}
 BOLD_RE = re.compile(r"\*\*(.+?)\*\*")
 ITAL_RE = re.compile(r"(?<!\*)\*([^*\n]+?)\*(?!\*)")
+JUNK_LINES = {
+    "Limited Time OfferThe Clout Chasing Culture Vultures Starter Pack£25.00£5.00Buy Now"
+}
 
 
 def _render_link(m):
     text, href = m.group(1), m.group(2)
-    # Wix autolinked a sentence boundary into a fake domain — unwrap it.
-    if JUNK_LINK_RE.match(href):
+    if JUNK_LINK_RE.match(href):          # Wix autolinked a sentence boundary
         return text if text.strip() else ""
     if not text.strip():
         return ""
-    # a bare URL as its own label reads badly; show the host instead
-    u = URLTEXT_RE.match(text.strip())
+    u = URLTEXT_RE.match(text.strip())    # a bare URL as its own label reads badly
     if u:
         text = u.group(1).replace("www.", "")
     return '<a href="%s" rel="noopener">%s</a>' % (html.escape(href, quote=True), text)
 
 
 def inline(text):
-    """Escape, then apply inline markdown."""
     t = html.escape(text, quote=False)
     t = LINK_RE.sub(_render_link, t)
     t = BOLD_RE.sub(r"<strong>\1</strong>", t)
@@ -91,14 +153,8 @@ def inline(text):
 
 
 def parse(md_text):
-    """Return (blocks, images, locked, wordcount).
-
-    blocks is a list of html strings; images is the ordered list of local
-    image filenames referenced by the post.
-    """
-    lines = md_text.split("\n")
-    # drop the title line, the source line and the leading rule
-    body, seen_rule = [], False
+    """Return (blocks, images, locked)."""
+    lines, body, seen_rule = md_text.split("\n"), [], False
     for ln in lines:
         if not seen_rule:
             if ln.strip() == "---":
@@ -106,95 +162,114 @@ def parse(md_text):
             continue
         body.append(ln)
 
-    locked = False
-    kept = []
+    locked, kept = False, []
     for ln in body:
         if PAYWALL_RE.search(ln):
             locked = True
             break
         kept.append(ln)
 
-    blocks, images, para, list_items = [], [], [], []
-    words = 0
+    blocks, images, para, items = [], [], [], []
 
     def flush_para():
-        nonlocal para, words
         if para:
             txt = " ".join(para).strip()
             if txt:
-                words += len(txt.split())
                 blocks.append("<p>%s</p>" % inline(txt))
-            para = []
+            para.clear()
 
     def flush_list():
-        nonlocal list_items
-        if list_items:
-            items = "".join("<li>%s</li>" % inline(i) for i in list_items)
-            blocks.append("<ul>%s</ul>" % items)
-            list_items = []
+        if items:
+            blocks.append("<ul>%s</ul>" % "".join("<li>%s</li>" % inline(i) for i in items))
+            items.clear()
 
     for ln in kept:
         s = ln.strip()
         if s in JUNK_LINES:
             continue
         if s in ("DPD.", "DPD"):
-            flush_para()
-            flush_list()
+            flush_para(); flush_list()
             blocks.append('<p class="sig">DPD.</p>')
             continue
         if not s:
-            flush_para()
-            flush_list()
+            flush_para(); flush_list()
             continue
         m = IMG_MD_RE.fullmatch(s)
         if m:
-            flush_para()
-            flush_list()
+            flush_para(); flush_list()
             h = HASH_RE.search(m.group(2))
             if h:
                 fn = h.group(1) + ".webp"
                 images.append(fn)
-                blocks.append(
-                    '<figure class="shot"><img src="../assets/img/%s" alt="" '
-                    'loading="lazy" decoding="async"></figure>' % fn
-                )
+                blocks.append('<figure><img src="../assets/img/%s" alt="" loading="lazy" '
+                              'decoding="async"></figure>' % fn)
             continue
         if s == "---":
-            flush_para()
-            flush_list()
-            blocks.append('<hr class="rule">')
+            flush_para(); flush_list()
+            blocks.append('<hr>')
             continue
         if s.startswith("#"):
-            flush_para()
-            flush_list()
-            lvl = len(s) - len(s.lstrip("#"))
-            txt = s.lstrip("#").strip()
-            words += len(txt.split())
-            blocks.append("<h%d>%s</h%d>" % (min(lvl + 1, 4), inline(txt), min(lvl + 1, 4)))
+            flush_para(); flush_list()
+            lvl = min(len(s) - len(s.lstrip("#")) + 1, 4)
+            blocks.append("<h%d>%s</h%d>" % (lvl, inline(s.lstrip("#").strip()), lvl))
             continue
         if s.startswith("> "):
-            flush_para()
-            flush_list()
+            flush_para(); flush_list()
             blocks.append("<blockquote><p>%s</p></blockquote>" % inline(s[2:]))
             continue
         if s.startswith(("- ", "* ")):
             flush_para()
-            words += len(s.split())
-            list_items.append(s[2:])
+            items.append(s[2:])
             continue
         flush_list()
         para.append(s)
 
-    flush_para()
-    flush_list()
-    return blocks, images, locked, words
+    flush_para(); flush_list()
+    return blocks, images, locked
 
 
-def shell(title, desc, body, css_depth, extra_class="", og_img=None):
-    up = "../" if css_depth else ""
-    og = ""
-    if og_img:
-        og = '<meta property="og:image" content="%sassets/img/%s">' % (up, og_img)
+def marquee(pos):
+    run = ("<span>" + (" " + TAGLINE) * 6 + "</span>") * 2
+    return ('<div class="ticker %s" aria-hidden="true"><div class="ticker-run">%s</div></div>'
+            % (pos, run))
+
+
+def nav(up):
+    out = []
+    for label, href, kind in NAV:
+        h = href if kind == "ext" else up + href
+        rel = ' rel="noopener"' if kind == "ext" else ""
+        out.append('<a href="%s"%s>%s</a>' % (h, rel, html.escape(label)))
+    return '<nav class="nav">%s</nav>' % "".join(out)
+
+
+def catbar(up, active="all"):
+    import urllib.parse
+    out = ['<a class="cat%s" href="%sindex.html#blog" data-cat="all">All Posts</a>'
+           % (" on" if active == "all" else "", up)]
+    for c in CATS:
+        out.append('<a class="cat" href="%sindex.html?cat=%s#blog" data-cat="%s">%s</a>'
+                   % (up, urllib.parse.quote(c), html.escape(c, quote=True), html.escape(c)))
+    return '<div class="catbar">%s</div>' % "".join(out)
+
+
+def byline(p, cls=""):
+    return ('<div class="byline %s"><img class="avatar" src="%savatar.webp" alt="" width="32" '
+            'height="32"><span class="who">DPD</span><span class="dot">&middot;</span>'
+            '<time datetime="%s">%s</time><span class="dot">&middot;</span>'
+            '<span class="rt">%d min read</span></div>'
+            % (cls, p["imgbase"], p["date"], p["disp"], p["mins"]))
+
+
+def chips(p, up):
+    import urllib.parse
+    return "".join('<a class="chip" href="%sindex.html?cat=%s#blog" data-cat="%s">%s</a>'
+                   % (up, urllib.parse.quote(c), html.escape(c, quote=True), html.escape(c))
+                   for c in p["cats"])
+
+
+def shell(title, desc, body, up, og=None, cls=""):
+    ogtag = ('<meta property="og:image" content="%sassets/img/%s.webp">' % (up, og)) if og else ""
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -204,23 +279,32 @@ def shell(title, desc, body, css_depth, extra_class="", og_img=None):
 <meta name="description" content="{html.escape(desc, quote=True)}">
 <meta property="og:title" content="{html.escape(title, quote=True)}">
 <meta property="og:description" content="{html.escape(desc, quote=True)}">
-<meta property="og:type" content="website">{og}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta property="og:type" content="website">{ogtag}
 <link rel="stylesheet" href="{up}assets/css/style.css">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%230b0b0c%22/><text y=%2274%22 x=%2250%22 text-anchor=%22middle%22 font-size=%2270%22 fill=%22%23e7b549%22 font-family=%22serif%22>&#9760;</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23000%22/><text y=%2278%22 x=%2250%22 text-anchor=%22middle%22 font-size=%2288%22 fill=%22%2300FF07%22 font-family=%22monospace%22>&gt;</text></svg>">
 </head>
-<body class="{extra_class}">
-<div class="grain" aria-hidden="true"></div>
+<body class="{cls}">
+{marquee('t')}
 {body}
+{marquee('b')}
+<script src="{up}assets/js/site.js" defer></script>
 </body>
 </html>
 """
 
 
-def tag_html(tags):
-    return "".join('<span class="tag">%s</span>' % html.escape(t) for t in tags)
+def footer(up):
+    return f"""
+<footer class="foot" id="about">
+  <canvas class="rain" data-rain aria-hidden="true"></canvas>
+  <div class="foot-in">
+    <p class="foot-mark">&gt;{SITE}</p>
+    <p class="foot-line">&copy; DreadPirateDuppie 2026.</p>
+    <p class="foot-line"><a href="mailto:{EMAIL}">{EMAIL}</a></p>
+    <p class="foot-line"><a class="red" href="{ORIGIN}" rel="noopener">&gt;_ORIGINAL_SITE</a></p>
+  </div>
+</footer>
+"""
 
 
 def main():
@@ -229,205 +313,142 @@ def main():
     os.makedirs(OUT_POSTS)
 
     built = []
-    for p in POSTS:
-        path = os.path.join(SRC, p["slug"] + ".md")
-        with open(path) as f:
-            blocks, images, locked, words = parse(f.read())
-        rec = dict(p)
-        rec.update(blocks=blocks, images=images, locked=locked, words=words,
-                   mins=max(1, round(words / 220)), lead=images[0] if images else None)
-        built.append(rec)
+    for (slug, title, date, disp, cats, mins, cover, excerpt) in POSTS:
+        with open(os.path.join(SRC, slug + ".md")) as f:
+            blocks, images, locked = parse(f.read())
+        built.append(dict(slug=slug, title=title, date=date, disp=disp, cats=cats,
+                          mins=mins, cover=cover, excerpt=excerpt, blocks=blocks,
+                          images=images, locked=locked, imgbase="../assets/img/"))
 
     for i, p in enumerate(built):
-        prev_p = built[i - 1] if i > 0 else None
-        next_p = built[i + 1] if i < len(built) - 1 else None
-        write_post(p, prev_p, next_p)
-
+        write_post(p, built[i - 1] if i else None,
+                   built[i + 1] if i < len(built) - 1 else None)
     write_index(built)
-    total_words = sum(p["words"] for p in built)
-    print("built %d posts, %d words, %d images"
-          % (len(built), total_words, sum(len(p["images"]) for p in built)))
+    print("built %d posts, %d locked" % (len(built), sum(p["locked"] for p in built)))
 
 
 def write_post(p, prev_p, next_p):
-    body_blocks = list(p["blocks"])
-    lead_fig = ""
-    if p["lead"]:
-        # promote the first image to a lead visual
-        for idx, b in enumerate(body_blocks):
-            if p["lead"] in b:
-                lead_fig = ('<figure class="lead-shot"><img src="../assets/img/%s" alt="" '
-                            'fetchpriority="high" decoding="async"></figure>' % p["lead"])
-                body_blocks.pop(idx)
-                break
-
-    # if the article opens with the same line we used as the dek, don't print it twice
-    if p["dek"]:
-        def norm(x):
-            return re.sub(r"[^a-z0-9]", "", re.sub(r"<[^>]+>", "", x).lower())[:60]
-        for idx, b in enumerate(body_blocks):
-            if b.startswith("<p>"):
-                if norm(b) and norm(b) == norm(p["dek"]):
-                    body_blocks.pop(idx)
-                break
-
-    # drop cap on the opening paragraph, but only if it is a real one —
-    # a short standfirst or a "A note before you read" label looks silly with it
-    for idx, b in enumerate(body_blocks):
-        if b.startswith("<p>"):
-            if len(re.sub(r"<[^>]+>", "", b)) > 120:
-                body_blocks[idx] = '<p class="lede">' + b[3:]
-            break
-
-    prose = "\n".join(body_blocks)
+    blocks = list(p["blocks"])
+    # some paywalled posts were cut off before the scraper saw any body text;
+    # the site's own feed excerpt is the best opening we legitimately have
     if p["locked"]:
-        prose += """
-<div class="locked-panel">
-  <div class="locked-mark">&#9679;</div>
-  <h3>The rest of this one was behind the paywall</h3>
-  <p>This post was published as a subscriber-only piece on the original site, so the archive only holds the opening. The full text lives with the original publisher.</p>
-  <a class="btn" href="https://www.dreadpirateduppie.com/post/%s" rel="noopener">Read it at the source &#8594;</a>
-</div>""" % p["slug"]
+        body_len = len(re.sub(r"<[^>]+>", "", " ".join(blocks)))
+        if body_len < len(p["excerpt"]):
+            blocks = ["<p>%s</p>" % html.escape(p["excerpt"], quote=False)]
+    prose = "\n".join(blocks)
+    if p["locked"]:
+        prose += f"""
+<div class="locked">
+  <p class="locked-h">&gt;_ACCESS_RESTRICTED</p>
+  <p>This one was published as a subscriber-only post, so the archive holds the opening
+  only. The full text lives with the original publisher.</p>
+  <a class="btn" href="{ORIGIN}/post/{p['slug']}" rel="noopener">&gt;_READ_AT_SOURCE</a>
+</div>"""
 
-    sub = '<p class="post-sub">%s</p>' % html.escape(p["sub"]) if p["sub"] else ""
-    dek = '<p class="post-dek">%s</p>' % html.escape(p["dek"]) if p["dek"] else ""
-
-    nav = []
+    nv = []
     if prev_p:
-        nav.append('<a class="pn prev" href="%s.html"><span class="pn-k">&#8592; Previous</span>'
-                   '<span class="pn-t">%s</span></a>' % (prev_p["slug"], html.escape(prev_p["title"])))
+        nv.append('<a class="pn" href="%s.html"><span>&lt; PREV</span><b>%s</b></a>'
+                  % (prev_p["slug"], html.escape(prev_p["title"])))
     else:
-        nav.append('<span class="pn empty"></span>')
+        nv.append("<span></span>")
     if next_p:
-        nav.append('<a class="pn next" href="%s.html"><span class="pn-k">Next &#8594;</span>'
-                   '<span class="pn-t">%s</span></a>' % (next_p["slug"], html.escape(next_p["title"])))
+        nv.append('<a class="pn next" href="%s.html"><span>NEXT &gt;</span><b>%s</b></a>'
+                  % (next_p["slug"], html.escape(next_p["title"])))
     else:
-        nav.append('<span class="pn empty"></span>')
-
-    meta = "%d min read &middot; %s words" % (p["mins"], f"{p['words']:,}")
-    if p["locked"]:
-        meta = "Excerpt &middot; subscriber post"
+        nv.append("<span></span>")
 
     body = f"""
-<div class="progress" id="progress"></div>
-<header class="topbar">
-  <a class="topbar-back" href="../index.html">&#8592; <span>Archive</span></a>
-  <a class="topbar-mark" href="../index.html">DPD</a>
+<header class="head compact">
+  <canvas class="rain" data-rain aria-hidden="true"></canvas>
+  {nav("../")}
+  <a class="wordmark small" href="../index.html">&gt;{SITE}</a>
 </header>
-<main class="post">
-  <div class="post-head">
-    <div class="tags">{tag_html(p['tags'])}</div>
-    <h1 class="post-title">{html.escape(p['title'])}</h1>
-    {sub}
-    {dek}
-    <div class="post-meta">{meta}</div>
-  </div>
-  {lead_fig}
-  <article class="prose">
-    {prose}
+{catbar("../")}
+<main class="wrap">
+  <article class="term">
+    {byline(p)}
+    <h1 class="ptitle">{html.escape(p['title'])}</h1>
+    <div class="chips">{chips(p, "../")}</div>
+    <div class="prose">
+      {prose}
+    </div>
   </article>
-  <nav class="postnav">{''.join(nav)}</nav>
-  <footer class="foot">
-    <a href="../index.html" class="foot-home">&#8592; Back to the archive</a>
-  </footer>
+  <nav class="postnav">{''.join(nv)}</nav>
 </main>
-<script>
-(function(){{
-  var bar=document.getElementById('progress');
-  function upd(){{
-    var h=document.documentElement,
-        m=(h.scrollHeight-h.clientHeight);
-    bar.style.transform='scaleX('+(m>0?(h.scrollTop||document.body.scrollTop)/m:0)+')';
-  }}
-  addEventListener('scroll',upd,{{passive:true}});addEventListener('resize',upd);upd();
-}})();
-</script>
+{footer("../")}
 """
-    out = shell("%s — %s" % (p["title"], SITE_TITLE),
-                p["dek"] or SITE_DESC, body, css_depth=1,
-                extra_class="post-page", og_img=p["lead"])
     with open(os.path.join(OUT_POSTS, p["slug"] + ".html"), "w") as f:
-        f.write(out)
+        f.write(shell("%s | %s" % (p["title"], SITE), p["excerpt"], body, "../",
+                      og=p["cover"], cls="post-page"))
 
 
 def write_index(built):
-    rows = []
-    for i, p in enumerate(built):
-        thumb = ('<img src="assets/img/%s" alt="" loading="lazy" decoding="async">' % p["lead"]
-                 if p["lead"] else '<span class="no-thumb">&#9760;</span>')
-        lock = '<span class="lock" title="Subscriber post">&#9679; excerpt</span>' if p["locked"] else ""
-        meta = ("Excerpt" if p["locked"] else "%d min" % p["mins"])
-        rows.append(f"""
-    <a class="row{' is-locked' if p['locked'] else ''}" href="posts/{p['slug']}.html">
-      <span class="row-num">{i + 1:02d}</span>
-      <span class="row-body">
-        <span class="row-title">{html.escape(p['title'])}{lock}</span>
-        {'<span class="row-sub">' + html.escape(p['sub']) + '</span>' if p['sub'] else ''}
-        <span class="row-dek">{html.escape(p['dek'])}</span>
-        <span class="row-tags">{tag_html(p['tags'])}<span class="row-mins">{meta}</span></span>
-      </span>
-      <span class="row-thumb">{thumb}</span>
-    </a>""")
+    feat = built[0]
+    feat_html = f"""
+  <section class="featured">
+    <a class="feat-img{" fit" if feat["cover"] in COVER_CONTAIN else ""}" href="posts/{feat['slug']}.html">
+      <img src="assets/img/{feat['cover']}.webp" alt="" fetchpriority="high" decoding="async">
+    </a>
+    <div class="feat-body">
+      <div class="feat-row">
+        {byline(dict(feat, imgbase="assets/img/"))}
+        <span class="feat-label">FEATURED POST</span>
+      </div>
+      <div class="chips">{chips(feat, "")}</div>
+      <h2 class="feat-title"><a href="posts/{feat['slug']}.html">{html.escape(feat['title'])}</a></h2>
+      <p class="feat-ex">{html.escape(feat['excerpt'])}</p>
+    </div>
+  </section>"""
 
-    total_words = sum(p["words"] for p in built)
+    cards = []
+    for p in built:
+        lock = '<span class="lock">&gt;_LOCKED</span>' if p["locked"] else ""
+        cards.append(f"""
+    <article class="card" data-cats="{html.escape(' '.join(p['cats']), quote=True)}">
+      <a class="card-img{" fit" if p["cover"] in COVER_CONTAIN else ""}" href="posts/{p['slug']}.html">
+        <img src="assets/img/{p['cover']}.webp" alt="" loading="lazy" decoding="async">
+      </a>
+      <div class="card-body">
+        {byline(dict(p, imgbase="assets/img/"))}
+        <div class="chips">{chips(p, "")}{lock}</div>
+        <h3 class="card-title"><a href="posts/{p['slug']}.html">{html.escape(p['title'])}</a></h3>
+        <p class="card-ex">{html.escape(p['excerpt'])}</p>
+      </div>
+    </article>""")
+
     body = f"""
-<header class="hero">
-  <div class="hero-inner">
-    <p class="kicker">Archive &#183; Peckham, London</p>
-    <h1 class="wordmark">
-      <span class="wm-l1">DREAD</span>
-      <span class="wm-l2">PIRATE</span>
-      <span class="wm-l3">DUPPIE</span>
-    </h1>
-    <p class="hero-tag">{html.escape(SITE_DESC)}</p>
-    <div class="hero-stats">
-      <span><b>{len(built)}</b> posts</span>
-      <span><b>{total_words:,}</b> words</span>
-      <span><b>{sum(len(p['images']) for p in built)}</b> images</span>
-    </div>
-  </div>
-  <div class="scroll-hint" aria-hidden="true">&#8595;</div>
+<header class="head">
+  <canvas class="rain" data-rain aria-hidden="true"></canvas>
+  {nav("")}
+  <h1 class="wordmark">&gt;{SITE}</h1>
 </header>
+<main class="wrap">
+  {feat_html}
+  <div class="sec-row" id="blog">
+    <h2 class="sec">"Blog"</h2>
+    <p class="count"><span id="shown">{len(built)}</span> / {len(built)} POSTS</p>
+  </div>
+  {catbar("")}
+  <div class="grid">{''.join(cards)}</div>
+  <p class="empty" id="empty" hidden>&gt;_NO_POSTS_IN_THIS_CATEGORY</p>
 
-<main>
-  <section class="archive" id="archive">
-    <h2 class="sec-title"><span>The Archive</span></h2>
-    <div class="rows">{''.join(rows)}
-    </div>
-  </section>
-
-  <section class="about" id="about">
-    <h2 class="sec-title"><span>About</span></h2>
-    <div class="about-grid">
-      <div class="about-text">
-        <p>Long-form writing on privacy, power, culture and the cost of your attention &mdash;
-        written from Peckham, London, in plain language, with the receipts.</p>
-        <p>The same person builds <b>PushInn</b>, a spot-mapping app for skaters born out of
-        a camera roll full of ledges collected while delivering food across the city, and runs
-        <b>BTEK.FM</b> on the side.</p>
-        <p class="about-note">This is a static archive of writing originally published at
-        dreadpirateduppie.com. Posts that were subscriber-only appear here as excerpts,
-        linking back to the source.</p>
-      </div>
-      <div class="about-links">
-        <a class="lk" href="https://pushinn.app/" rel="noopener"><b>PushInn</b><span>Find the spot. Push in.</span></a>
-        <a class="lk" href="https://dreadpirateduppie.github.io/BTEK.FM/" rel="noopener"><b>BTEK.FM</b><span>Radio &amp; live sets</span></a>
-        <a class="lk" href="https://dreadpirateduppie.github.io/rmgl-portfolio/" rel="noopener"><b>RMGL</b><span>Photography</span></a>
-        <a class="lk" href="https://www.dreadpirateduppie.com" rel="noopener"><b>Original site</b><span>dreadpirateduppie.com</span></a>
-        <a class="lk" href="https://github.com/DreadPirateDuppie" rel="noopener"><b>GitHub</b><span>@DreadPirateDuppie</span></a>
-      </div>
-    </div>
+  <section class="who-box">
+    <h2 class="sec">Who is DPD?</h2>
+    <p>/Founder/Scientist/Student of life/Triptonaught/Statistic/Boss/Citizen of The World/God/G.</p>
+    <p>Writing out of Peckham, London on privacy, power, culture and the cost of your attention.
+    Builds <a href="https://pushinn.app/" rel="noopener">Pushinn</a>, runs
+    <a href="https://dreadpirateduppie.github.io/BTEK.FM/" rel="noopener">BTEK.FM</a>, shoots
+    <a href="https://dreadpirateduppie.github.io/rmgl-portfolio/" rel="noopener">photography</a>.</p>
+    <p class="note">This is a static archive of {len(built)} posts from
+    dreadpirateduppie.com. Subscriber-only posts appear as excerpts and link back to the source.</p>
   </section>
 </main>
-
-<footer class="site-foot">
-  <span class="sf-mark">&#9760;</span>
-  <span>Dread Pirate Duppie &mdash; archive</span>
-</footer>
+{footer("")}
 """
     with open(os.path.join(ROOT, "index.html"), "w") as f:
-        f.write(shell(SITE_TITLE + " — Archive", SITE_DESC, body, css_depth=0,
-                      extra_class="home", og_img=built[0]["lead"]))
+        f.write(shell(SITE, "Essays on privacy, power, culture and the cost of your attention. "
+                            "Written from Peckham, London.", body, "", og=feat["cover"],
+                      cls="home"))
 
 
 if __name__ == "__main__":
