@@ -430,3 +430,9 @@ a.wordmark{ text-decoration:none; display:block; }
   .onair-img{ border-right:0; border-bottom:1px solid var(--green-line); }
   .sets{ grid-template-columns:1fr; }
 }
+
+/* about page */
+.about-copy p{
+  font-size:clamp(1rem,2.2vw,1.2rem); line-height:1.9; margin-bottom:1.75rem;
+}
+.term > .sig{ text-align:left; }

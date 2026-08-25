@@ -28,7 +28,7 @@ NAV = [
     ("BTEK.FM", "btek.html", ""),
     ("Shop", ORIGIN + "/category/all-products", "ext"),
     ("Letterboxd", ORIGIN + "/letterboxd", "ext"),
-    ("About", ORIGIN + "/about", "ext"),
+    ("About", "about.html", ""),
 ]
 
 # covers that are logos, not photographs: letterbox them instead of cropping
@@ -160,8 +160,18 @@ JUNK_LINES = {
 }
 
 
+SLUGS = set()  # filled in main(); lets in-body cross-references stay on this site
+
+
 def _render_link(m):
     text, href = m.group(1), m.group(2)
+    # a link to another post on the old host is an internal cross-reference here
+    x = re.match(r"https?://(?:www\.)?dreadpirateduppie\.com/post/([^/?#]+)", href)
+    if x:
+        import urllib.parse
+        slug = urllib.parse.unquote(x.group(1))
+        if slug in SLUGS:
+            return '<a href="%s.html">%s</a>' % (slug, text)
     if JUNK_LINK_RE.match(href):          # Wix autolinked a sentence boundary
         return text if text.strip() else ""
     if not text.strip():
@@ -329,7 +339,6 @@ def footer(up, extra=""):
     <p class="foot-mark">&gt;{SITE}</p>
     <p class="foot-line">&copy; DreadPirateDuppie 2026.</p>
     <p class="foot-line"><a href="mailto:{EMAIL}">{EMAIL}</a></p>
-    <p class="foot-line"><a class="red" href="{ORIGIN}" rel="noopener">&gt;_ORIGINAL_SITE</a></p>
     {extra}
   </div>
 </footer>
@@ -341,6 +350,7 @@ def main():
         shutil.rmtree(OUT_POSTS)
     os.makedirs(OUT_POSTS)
 
+    SLUGS.update(x[0] for x in POSTS)
     built = []
     for (slug, title, date, disp, cats, mins, cover, excerpt) in POSTS:
         with open(os.path.join(SRC, slug + ".md")) as f:
@@ -354,6 +364,7 @@ def main():
                    built[i + 1] if i < len(built) - 1 else None)
     write_index(built)
     write_btek()
+    write_about()
     print("built %d posts, %d locked" % (len(built), sum(p["locked"] for p in built)))
 
 
@@ -440,6 +451,38 @@ def write_btek():
                       "hosted by DJ FRYEYE." % (len(STREAMS), hrs, mins),
                       body, "", og=latest[5], cls="btek"))
     print("built btek.html (%d sets, %dh %dm)" % (len(STREAMS), hrs, mins))
+
+
+ABOUT_COPY = [
+    "I am the quiet architect of the spark, the hidden hand building foundations in the "
+    "hour of noise.",
+    "While the world sleeps, I map paths through the trackless dark, charting my own course "
+    "through the trenches of the network and the circuits of the street.",
+    "I do not fly under any flag but my own; I am the sudden current commanding every system "
+    "I touch.",
+]
+
+
+def write_about():
+    paras = "".join("<p>%s</p>" % html.escape(x) for x in ABOUT_COPY)
+    body = f"""
+<header class="head compact">
+  <canvas class="rain" data-rain aria-hidden="true"></canvas>
+  {nav("")}
+  <a class="wordmark small" href="index.html">&gt;{SITE}</a>
+</header>
+<main class="wrap">
+  <article class="term">
+    <h1 class="ptitle">About Moi</h1>
+    <div class="prose about-copy">{paras}</div>
+    <p class="sig">DPD.</p>
+  </article>
+</main>
+{footer("")}
+"""
+    with open(os.path.join(ROOT, "about.html"), "w") as f:
+        f.write(shell("About | " + SITE, ABOUT_COPY[0], body, "", cls="about-page"))
+    print("built about.html")
 
 
 def write_post(p, prev_p, next_p):
@@ -551,8 +594,8 @@ def write_index(built):
     <h2 class="sec">Who is DPD?</h2>
     <p>/Founder/Scientist/Student of life/Triptonaught/Statistic/Boss/Citizen of The World/God/G.</p>
     <p>Writing out of Peckham, London on privacy, power, culture and the cost of your attention.</p>
-    <p class="note">This is a static archive of {len(built)} posts from
-    dreadpirateduppie.com. Subscriber-only posts appear as excerpts and link back to the source.</p>
+    <p class="note">{len(built)} posts. Four are subscriber-only and currently show their
+    opening section.</p>
   </section>
 </main>
 {footer("")}
