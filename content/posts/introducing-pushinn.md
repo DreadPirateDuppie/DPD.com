@@ -1,0 +1,123 @@
+# introducing pushinn
+
+*Source: https://www.dreadpirateduppie.com/post/introducing-pushinn*
+
+---
+
+Yoo, This post is about a project thats been living rent free in my head since 2021. Can't lie It’s not just a business idea at this point; it’s become an obsession.[ ](http://obsession.In)
+
+Years ago, man was tyring to build a clothing brand for skaters. I had the designs and I had the vision, but I was trying to do everything entirely on my own in a pre-AI world, it was a myth. I struggled to even get anyone to help me, and honestly on top of that, I couldn't afford the logistics to make the physical products to a standard that'd satisfy my ambitions. 
+
+Because I was a one man army, everything took so long to execute that every time I'd find myself making progress, I would also end up moving the goal post further and further away. I was grind, constantly learning and developing my knowledge, which meant my plans kept changing. This made it even harder to find help, because from the outside, I probably looked inconsistent, mad even. But in reality, I was just grinding in the dark, trying to find a way to express myself creatively through my work and contribute to this culture that has given so much to me with what felt like zero resources.
+
+It's funny in a way, this project has just brought me back to where I started. Back in secondary school, I actually used to study computer programming for a number years. This is the type of thing I was dreaming of building back in Year 7, back when they were teaching me to read binary code and run python scripts. Life circumstances unfortunately forced me to step away from that path and led me to explore other interests, but now, I have come full circle.
+
+![image](https://static.wixstatic.com/media/a055e6_315c9461c71b481f859f4cf896d0f920~mv2.jpg)
+
+When I realized I needed more money to make this vision real, I didn't wait for investors. I locked tf in, I can still recall all of the cold nights out there on road. One of the things I found myself doing in my pursuit of capital was delivering food. While I was flying around feeding the hungry bellies of London, I was unknowingly and manually building the database that would become the foundation of PushInn. Every skater knows what it's like when you're walking around and you see the perfect ledge or stair set and you're like, "I need to remember where this is, i gotta hit this one day." That was me, mindlessly riding through the city traffic everyday. It was actually quite fun to a certain extent, as it kept my brain engaged while I rode around for hours on end. And it gave me purpose when I'd end up in the middle of fucking nowhere after delivering some random person's happy meal with no follow-up orders. At least I had an opportunity to go and collect more spots. 
+
+I would often spend my spare time taking photos of spots, and marking their locations by screenshotting my position on Google Maps. I was building a map of the city in my camera roll because I knew, eventually, I would want to come back to them as at the time, I had been on a hiatus from skating, despite my constant love for the sport, As a result of some physical and mental injuries and also so I could focus on the grind..
+
+Eventually, the question hit me: "What if I made an app for this?".
+
+I didn't have a co-founder. I didn't have a budget. But I did have the vision, a dormant technical background and enough delusion and drive to see it through. So that's why, I've spent the past year or so re-teaching myself how to program in order to realize this idea. I went from writing business plans to writing the actual code that powers this platform, simply because I refused to let this idea die.
+
+## So, What Is PushInn?
+
+PushInn is a utility app built around community, competition, and actual progression.
+
+While the long-term vision includes BMX and Parkour riders, and even you fuckers on the scooters, Right now I am laser-focused on getting the Skating experience perfect.
+
+![image](https://static.wixstatic.com/media/a055e6_c456ea8a91144175b10e69fe91e0a7f5~mv2.jpg)
+
+Sneak preview of what part of the post screens look like.(keep in mind, the design is subject to change, but I do feel pretty confident about this one specifically)
+
+## The Experience: Your City is the Board 
+
+PushInn isn't just a list of features; it's a tool to amplify your session.
+
+• Spot Discovery:  I built a map-based spot discovery system. You can pull up the map to see exactly what is around you or explore cities you are planning to visit.
+
+• Territory & MVPs: I didn't want you to just be a tourist; I wanted you to claim ground. If you upload the best trick at a specific spot and the community votes your clip higher, you become the MVP of that spot. You have effectively claimed that territory until someone beats you.
+
+• The Battle System: If you're feeling competitive but your crew isn't around, you can enter the battle system. You can challenge a skater halfway across the world to a game of S.K.A.T.E. (B.I.K.E) without needing to be at the same park.
+
+A Note on Points: Currently, the points you earn from battles and MVPs for clout. They exist for vanity and bragging rights. But there is a specific reason for that, which leads me to...
+
+## The Dream: Where I Am Taking This
+
+What you see now is just the foundation. I want to seed the vision of where I am taking this, because to me at least the potential is massive.
+
+• Live Warfare & Stakes: I plan to evolve the app beyond asynchronous games into live skate battles. The ultimate dream is to allow you to stake your points and actually earn money when you win matches, turning those "vanity numbers" into real metrics that [matter](http://matter.ye). (yes, that's right. The vanity numbers will be converted into tokens if we are able to achieve regulatory compliance. So, Think twice before you brush them off.)
+
+• Crypto & Tipping: To make this economy seamless, I want to integrate cryptocurrency. 
+
+This would power the wagering system and facilitate a tipping ecosystem, allowing users to tip skaters instantly as they watch them live. 
+
+However, I need to be transparent: The regulatory environment in this country regarding cryptocurrency and wagering is incredibly strict. While my goal is to integrate these features, I cannot guarantee them 100%. There are massive compliance hurdles and legal costs involved in doing this legitimately. I am down to fight to make it happen, but if the regulations prevent it, I won't jeopardize the app by operating illegally. It is a possibility, not a promise.
+
+• Community Governance (DAO): I am looking into creating a Decentralized Autonomous Organization (DAO). The goal is to fill a treasury with profits from the company and let you control it. For major events, like an internal "Skater of the Year". The community will use the DAO to vote on the winners and decide who gets the payout. This DAO could also be used to help the community shape the development of the app, effectively allowing us to crowdsource the future for this app together.
+
+• Sponsored Spots: I plan on building relationships with brands to create sponsored spots on the map. Imagine a brand installing a DIY obstacle in a public space; and then creating a campaign where there's a digital "pot" of money for that whoever lands the best tricks gets paid out from the prize pool.
+
+• The Path to Pro: Ultimately, this is about helping you make it. I want to use my future connections with brands to help up-and-coming skaters secure sponsorships. I will use the app to verify your skill, showing brands exactly how many battles you've won and what territory you hold.
+
+## The Reality: A Solo Dev With Zero Budget
+
+I know the vision is huge, but let's talk about the reality. The core mechanics work and I'm in the testing and polish phase now.
+
+![image](https://static.wixstatic.com/media/a055e6_dc863bba17c14cdbaac243b055f5165e~mv2.png)
+
+But here is the truth: I have built everything you see so far while spending zero money.
+
+And let me stop you before you think it, I haven't spent zero because I'm trying to be cheap; I've spent zero because I genuinely couldn't afford to. I am a solo developer with nobody helping me at all. I've been building this on my jack jones, seeding it with my time and effort, but that comes with limits. Without capital, things move slowly. If you want to see this vision realized faster, financial support isn't just "appreciated", it's the fuel that will let me break through the limitations currently holding me back. And the more fuel i have, the faster I can go faster get this thing to market. Help me make this work so I don't have to go to my fall back career as a rapper. or at the very least follow me on SoundCloud.
+
+## How You Can Help
+
+If you see the vision, believe in the idea, and want to help me realize this, there are a few ways you can get involved right now:
+
+1. Follow the Instagram: Stay locked in for visual updates and clips.
+
+2. Follow the Blog: This is where I'll drop the deep dives on development and announcements for now.
+
+3. Support the Project Financially: This is the big one. Building a platform that can handle live wagering, crypto integration, global mapping and more costs money.
+
+To make it worth your while, I am setting up an Indiegogo campaign. I don't just want your money; I want you to be part of the team. Here is what I am planning for those who back the project:
+
+• The Slap Pack: Grab a pack of high-quality PushInn stickers to slap on your board or at your local spots.
+
+• Limited Edition Merch: Remember those clothing ideas I had back in 2021 that I couldn't afford to make? If this project is successful enough, I might finally release those original designs as exclusive rewards for the founding members.
+
+• Secure Your Legacy: I am designing exclusive "Founder" profile badges. When the app blows up, everyone will know you were here on Day one.
+
+• The Hall of Fame: For the heavy hitters who really want to back the vision, I will permanently list your name in the app's "Credits" section as a Founding Patron. You aren't just a user; you're part of the history.
+
+## Where to Donate:
+
+• Donate via XMR (Monero): For those who value privacy and the crypto ethos.
+
+(QR code coming soon)
+
+• Indiegogo (Coming Soon): Keep your eyes peeled for the link drop.
+
+## The Offer: Why You Should Join Now
+
+To fund the sustainability of the app in the future, I will eventually have to implement advertisements and subscriptions. However, if you get in now on the ground floor, you won't have to worry about that.
+
+![image](https://static.wixstatic.com/media/a055e6_f8889a35c2f7497d9d5ed9b3913c5061~mv2.jpg)
+
+As a token of appreciation for believing in the idea early, all beta testers will be given lifelong premium access. That means:
+
+• No Adverts.
+
+• No Subscriptions.
+
+• Free access to all future premium features.
+
+You are helping me build this foundation, so you get to ride for free. If you're interested in securing your legacy as a certified Spot Hunter and locking in that OG status, reach out—I'd love to get feedback and need help seeding spots worldwide.
+
+Anyway, Thank you for your time!
+
+Back to coding.
+
+DPD.
