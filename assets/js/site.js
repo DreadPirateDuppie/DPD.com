@@ -119,3 +119,45 @@
   }
   q.addEventListener("input", run);
 })();
+
+/* ---- photography lightbox ---- */
+(function () {
+  "use strict";
+  var lb = document.getElementById("lb");
+  if (!lb) return;
+  var tiles = [].slice.call(document.querySelectorAll(".shot-t")),
+      img = document.getElementById("lbimg"),
+      cnt = document.getElementById("lbc"),
+      cur = 0;
+
+  function show(i) {
+    cur = (i + tiles.length) % tiles.length;
+    img.src = tiles[cur].getAttribute("data-full");
+    cnt.textContent = (cur + 1) + " / " + tiles.length;
+    lb.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function hide() {
+    lb.hidden = true;
+    img.src = "";
+    document.body.style.overflow = "";
+  }
+
+  tiles.forEach(function (t, i) {
+    t.addEventListener("click", function () { show(i); });
+  });
+  document.getElementById("lbx").addEventListener("click", hide);
+  document.getElementById("lbp").addEventListener("click", function (e) {
+    e.stopPropagation(); show(cur - 1);
+  });
+  document.getElementById("lbn").addEventListener("click", function (e) {
+    e.stopPropagation(); show(cur + 1);
+  });
+  lb.addEventListener("click", function (e) { if (e.target === lb) hide(); });
+  document.addEventListener("keydown", function (e) {
+    if (lb.hidden) return;
+    if (e.key === "Escape") hide();
+    else if (e.key === "ArrowLeft") show(cur - 1);
+    else if (e.key === "ArrowRight") show(cur + 1);
+  });
+})();

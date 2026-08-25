@@ -23,11 +23,9 @@ NAV = [
     # mirrors the original site's menu. Only the blog is reproduced in this
     # archive; the other sections still live on dreadpirateduppie.com.
     ("Home", "index.html", ""),
-    ("Photography", ORIGIN + "/projects-7", "ext"),
+    ("Photography", "photography.html", ""),
     ("Blog", "index.html#blog", ""),
     ("BTEK.FM", "btek.html", ""),
-    ("Shop", ORIGIN + "/category/all-products", "ext"),
-    ("Letterboxd", ORIGIN + "/letterboxd", "ext"),
     ("About", "about.html", ""),
 ]
 
@@ -365,6 +363,7 @@ def main():
     write_index(built)
     write_btek()
     write_about()
+    write_photography()
     print("built %d posts, %d locked" % (len(built), sum(p["locked"] for p in built)))
 
 
@@ -483,6 +482,64 @@ def write_about():
     with open(os.path.join(ROOT, "about.html"), "w") as f:
         f.write(shell("About | " + SITE, ABOUT_COPY[0], body, "", cls="about-page"))
     print("built about.html")
+
+
+PHOTOS = [
+    "a055e6_128b908052e449b7a4885bef6ce9a741",
+    "a055e6_94db98b8e3e8434286a020f16043f8a4",
+    "a055e6_26b457003bb44f40b87c248108f53368",
+    "a055e6_2b6942a4de9e41c9a36d6a5aef15a25f",
+    "a055e6_4909a23e51b84daf80f30a98ef25d5ce",
+    "a055e6_47561f8d04654fc090a4619cc2328e9a",
+    "a055e6_6492f5ab33ce43acb79e5f7e5e9ba396",
+    "a055e6_d84eabde7351416bbddf5a61e0c83333",
+    "a055e6_6da205a07b9d4d88becb6fda45d225c1",
+    "a055e6_77423cd816714f8ca2ff5e4fc60fe3ba",
+    "a055e6_7ccac0f8653743a5a7eef2c5eec1eeb5",
+    "a055e6_a44e34733f49492aa93fce19379cfaf6",
+    "a055e6_b69f597f1a8e4745854c5a96296aa650",
+]
+
+
+def write_photography():
+    tiles = "".join(
+        f"""
+      <button class="shot-t" data-full="assets/img/{h}.webp" data-i="{i}" aria-label="Open image {i + 1}">
+        <img src="assets/img/{h}_t.webp" alt="" loading="lazy" decoding="async">
+        <span class="shot-n">{i + 1:02d}</span>
+      </button>""" for i, h in enumerate(PHOTOS))
+
+    body = f"""
+<header class="head compact">
+  <canvas class="rain" data-rain aria-hidden="true"></canvas>
+  {nav("")}
+  <a class="wordmark small" href="index.html">&gt;{SITE}</a>
+</header>
+<main class="wrap">
+  <div class="sec-row">
+    <h1 class="sec">Photography</h1>
+    <p class="count">{len(PHOTOS)} FRAMES</p>
+  </div>
+  <p class="page-lede">Street and travel work &mdash; Marrakech, Naples, London.
+  Shot on the move, mostly on foot.</p>
+  <div class="gallery">{tiles}
+  </div>
+</main>
+
+<div class="lightbox" id="lb" hidden>
+  <button class="lb-close" id="lbx" aria-label="Close">&times;</button>
+  <button class="lb-nav lb-prev" id="lbp" aria-label="Previous">&#8592;</button>
+  <img id="lbimg" src="" alt="">
+  <button class="lb-nav lb-next" id="lbn" aria-label="Next">&#8594;</button>
+  <p class="lb-count" id="lbc"></p>
+</div>
+{footer("")}
+"""
+    with open(os.path.join(ROOT, "photography.html"), "w") as f:
+        f.write(shell("Photography | " + SITE,
+                      "Street and travel photography from Marrakech, Naples and London.",
+                      body, "", og=PHOTOS[0], cls="photo-page"))
+    print("built photography.html (%d frames)" % len(PHOTOS))
 
 
 def write_post(p, prev_p, next_p):

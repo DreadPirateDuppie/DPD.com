@@ -1,6 +1,6 @@
 # dreadpirateduppie.com — static archive
 
-A static rebuild of [dreadpirateduppie.com](https://www.dreadpirateduppie.com),
+dreadpirateduppie.com, rebuilt as a static site,
 matching the original's terminal look: black ground, `#00FF07` phosphor green,
 `#FA0000` alert red, Courier New chrome, Matrix rain and the
 `> _STANDING_ON_BUSINESS_SINCE_2025.` tickers.
